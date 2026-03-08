@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beep Generator 98</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #008080;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 20px 50px;
+        }
+        .window {
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            box-shadow: 2px 2px 0 #000;
+            width: 400px;
+        }
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 3px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 11px;
+            user-select: none;
+        }
+        .title-bar-left { display: flex; align-items: center; gap: 6px; }
+        .title-buttons { display: flex; gap: 2px; }
+        .title-btn {
+            width: 16px; height: 14px;
+            background: #c0c0c0;
+            border: 1px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 9px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #000; font-weight: bold; padding: 0;
+        }
+        .title-btn:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .menu-bar {
+            background: #c0c0c0;
+            padding: 2px 4px;
+            border-bottom: 1px solid #808080;
+            display: flex; gap: 2px;
+        }
+        .menu-item { padding: 2px 6px; cursor: pointer; font-size: 11px; }
+        .menu-item:hover { background: #000080; color: white; }
+        .content { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .group-box {
+            border: 1px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 8px 10px 10px;
+            position: relative; margin-top: 8px;
+        }
+        .group-label {
+            position: absolute; top: -8px; left: 8px;
+            background: #c0c0c0; padding: 0 4px; font-size: 11px;
+        }
+        .sound-types { display: flex; flex-direction: column; gap: 4px; }
+        .sound-type-item { display: flex; align-items: center; gap: 6px; }
+        .sound-type-item input[type="checkbox"] {
+            width: 13px; height: 13px; cursor: pointer; accent-color: #000080;
+        }
+        .sound-type-item span { flex: 1; font-size: 11px; }
+        .preview-btn {
+            padding: 1px 8px;
+            background: #c0c0c0;
+            border: 1px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 10px; cursor: pointer;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+        }
+        .preview-btn:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 2px 7px 0px 9px;
+        }
+        .range-row { display: flex; gap: 10px; margin-top: 4px; }
+        .range-col { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .range-col label { font-size: 10px; color: #000; }
+        input[type="range"] { width: 100%; height: 18px; accent-color: #000080; cursor: pointer; }
+        .val-display { font-size: 10px; color: #000080; font-weight: bold; }
+        .audio-upload-area {
+            border: 2px dashed #808080;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            background: #d4d0c8;
+            margin-top: 4px;
+        }
+        .audio-upload-area:hover { background: #c8c4bc; }
+        .audio-file-list {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+        .audio-file-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #d4d0c8;
+            padding: 2px 6px;
+            border: 1px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            font-size: 10px;
+        }
+        .audio-file-item input[type="checkbox"] {
+            width: 12px; height: 12px; accent-color: #000080;
+        }
+        .audio-file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .remove-btn {
+            padding: 0px 4px;
+            background: #c0c0c0;
+            border: 1px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 9px; cursor: pointer; color: #800000;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+        }
+        .remove-btn:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .audio-mix-row {
+            display: flex; align-items: center; gap: 6px; margin-top: 6px;
+        }
+        .audio-mix-row label { font-size: 10px; flex: 1; }
+        .btn-row {
+            display: flex; justify-content: center; gap: 8px; margin-top: 6px;
+        }
+        .win-btn {
+            padding: 4px 20px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 11px; cursor: pointer; min-width: 80px;
+        }
+        .win-btn:active { border-color: #808080 #ffffff #ffffff #808080; padding: 5px 19px 3px 21px; }
+        .win-btn:disabled { color: #808080; cursor: default; }
+        .win-btn:disabled:active { border-color: #ffffff #808080 #808080 #ffffff; padding: 4px 20px; }
+        .win-btn.primary { font-weight: bold; }
+        .win-btn.stop { color: #800000; }
+        .status-bar {
+            background: #c0c0c0;
+            border-top: 1px solid #808080;
+            padding: 2px 6px; display: flex; gap: 4px;
+        }
+        .status-panel {
+            flex: 1;
+            border: 1px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 1px 4px; font-size: 10px; color: #000;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .warning { color: #800000; font-size: 10px; text-align: center; }
+        .taskbar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+            background: #c0c0c0; border-top: 2px solid #ffffff;
+            display: flex; align-items: center; padding: 0 4px; gap: 4px;
+        }
+        .start-btn {
+            padding: 2px 8px; background: #c0c0c0;
+            border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff;
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 11px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .start-btn:active { border-color: #808080 #ffffff #ffffff #808080; }
+        .taskbar-window {
+            padding: 2px 10px; background: #c0c0c0;
+            border: 2px solid; border-color: #808080 #ffffff #ffffff #808080;
+            font-size: 11px; font-family: 'MS Sans Serif', Arial, sans-serif;
+            display: flex; align-items: center; gap: 4px; height: 22px;
+        }
+        .clock {
+            margin-left: auto; border: 1px solid;
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 2px 8px; font-size: 11px;
+        }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="window">
+    <div class="title-bar">
+        <div class="title-bar-left">
+            <span>🔔</span>
+            <span>Beep Generator 98</span>
+        </div>
+        <div class="title-buttons">
+            <button class="title-btn">_</button>
+            <button class="title-btn">□</button>
+            <button class="title-btn">✕</button>
+        </div>
+    </div>
+
+    <div class="menu-bar">
+        <span class="menu-item">ファイル(F)</span>
+        <span class="menu-item">編集(E)</span>
+        <span class="menu-item">ヘルプ(H)</span>
+    </div>
+
+    <div class="content">
+
+        <div class="group-box">
+            <span class="group-label">ピープ音の種類</span>
+            <div class="sound-types" id="soundTypes">
+                <div class="sound-type-item">
+                    <input type="checkbox" value="sine" checked>
+                    <span>サイン波（柔らか）</span>
+                    <button class="preview-btn" data-type="sine">試聴</button>
+                </div>
+                <div class="sound-type-item">
+                    <input type="checkbox" value="square" checked>
+                    <span>矩形波（電子音）</span>
+                    <button class="preview-btn" data-type="square">試聴</button>
+                </div>
+                <div class="sound-type-item">
+                    <input type="checkbox" value="triangle">
+                    <span>三角波（まろやか）</span>
+                    <button class="preview-btn" data-type="triangle">試聴</button>
+                </div>
+                <div class="sound-type-item">
+                    <input type="checkbox" value="sawtooth">
+                    <span>鋸歯状波（鋭い）</span>
+                    <button class="preview-btn" data-type="sawtooth">試聴</button>
+                </div>
+                <div class="sound-type-item">
+                    <input type="checkbox" value="noise">
+                    <span>ノイズ（プツッ）</span>
+                    <button class="preview-btn" data-type="noise">試聴</button>
+                </div>
+            </div>
+            <div class="warning" id="typeWarning" style="display:none">※ 最低1つ選択してください</div>
+        </div>
+
+        <div class="group-box">
+            <span class="group-label">音声ファイル（ランダム再生）</span>
+            <div class="audio-upload-area" onclick="document.getElementById('audioInput').click()">
+                📁 クリックして音声ファイルを追加
+                <input type="file" id="audioInput" accept="audio/*" multiple>
+            </div>
+            <div class="audio-file-list" id="audioFileList"></div>
+            <div class="range-row" style="margin-top:8px">
+                <div class="range-col">
+                    <label>再生秒数 最小: <span class="val-display" id="audioMinVal">0.5秒</span></label>
+                    <input type="range" id="audioMinSlider" min="0.1" max="4.9" step="0.1" value="0.5">
+                </div>
+                <div class="range-col">
+                    <label>再生秒数 最大: <span class="val-display" id="audioMaxVal">3.0秒</span></label>
+                    <input type="range" id="audioMaxSlider" min="0.2" max="5.0" step="0.1" value="3.0">
+                </div>
+            </div>
+            <div class="audio-mix-row">
+                <input type="checkbox" id="mixAudio" checked style="width:13px;height:13px;accent-color:#000080">
+                <label for="mixAudio">ピープ音と混在させる（オフにすると音声ファイルのみ）</label>
+            </div>
+        </div>
+
+        <div class="group-box">
+            <span class="group-label">鳴らす間隔</span>
+            <div class="range-row">
+                <div class="range-col">
+                    <label>最小: <span class="val-display" id="minVal">0.0秒</span></label>
+                    <input type="range" id="intervalMinSlider" min="0" max="0.9" step="0.1" value="0">
+                </div>
+                <div class="range-col">
+                    <label>最大: <span class="val-display" id="maxVal">1.0秒</span></label>
+                    <input type="range" id="intervalMaxSlider" min="0" max="1.0" step="0.1" value="1.0">
+                </div>
+            </div>
+        </div>
+
+        <div class="group-box">
+            <span class="group-label">ピープ長さ</span>
+            <div class="range-row">
+                <div class="range-col">
+                    <label>最小: <span class="val-display" id="durMinVal">0.10秒</span></label>
+                    <input type="range" id="durMinSlider" min="0.05" max="0.45" step="0.05" value="0.1">
+                </div>
+                <div class="range-col">
+                    <label>最大: <span class="val-display" id="durMaxVal">0.50秒</span></label>
+                    <input type="range" id="durMaxSlider" min="0.1" max="0.5" step="0.05" value="0.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="group-box">
+            <span class="group-label">周波数</span>
+            <div class="range-row">
+                <div class="range-col">
+                    <label>最小: <span class="val-display" id="freqMinVal">440Hz</span></label>
+                    <input type="range" id="freqMinSlider" min="200" max="1900" step="50" value="440">
+                </div>
+                <div class="range-col">
+                    <label>最大: <span class="val-display" id="freqMaxVal">1200Hz</span></label>
+                    <input type="range" id="freqMaxSlider" min="250" max="2000" step="50" value="1200">
+                </div>
+            </div>
+        </div>
+
+        <div class="group-box">
+            <span class="group-label">音量</span>
+            <div class="range-row">
+                <div class="range-col">
+                    <label>最小: <span class="val-display" id="volMinVal">10%</span></label>
+                    <input type="range" id="volMinSlider" min="0.05" max="0.45" step="0.05" value="0.1">
+                </div>
+                <div class="range-col">
+                    <label>最大: <span class="val-display" id="volMaxVal">50%</span></label>
+                    <input type="range" id="volMaxSlider" min="0.1" max="0.5" step="0.05" value="0.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="win-btn primary" id="startBtn">▶ 開始</button>
+            <button class="win-btn" id="skipBtn" disabled onclick="skipNext()">⏭ 次へ</button>
+            <button class="win-btn" onclick="resetAll()">リセット</button>
+        </div>
+
+    </div>
+
+    <div class="status-bar">
+        <div class="status-panel" id="status">準備完了</div>
+    </div>
+</div>
+
+<div class="taskbar">
+    <button class="start-btn">🪟 スタート</button>
+    <div class="taskbar-window">🔔 Beep Generator 98</div>
+    <div class="clock" id="clock">00:00</div>
+</div>
+
+<script>
+    let audioCtx = null;
+    let running = false;
+    let timeoutId = null;
+    let audioFiles = [];
+
+    const startBtn = document.getElementById('startBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const status = document.getElementById('status');
+    const audioInput = document.getElementById('audioInput');
+    const audioFileList = document.getElementById('audioFileList');
+
+    function getRandom(min, max) {
+        if (min === max) return min;
+        return Math.random() * (max - min) + min;
+    }
+
+    function updateLabels() {
+        document.getElementById('minVal').textContent = parseFloat(document.getElementById('intervalMinSlider').value).toFixed(1) + '秒';
+        document.getElementById('maxVal').textContent = parseFloat(document.getElementById('intervalMaxSlider').value).toFixed(1) + '秒';
+        document.getElementById('durMinVal').textContent = parseFloat(document.getElementById('durMinSlider').value).toFixed(2) + '秒';
+        document.getElementById('durMaxVal').textContent = parseFloat(document.getElementById('durMaxSlider').value).toFixed(2) + '秒';
+        document.getElementById('freqMinVal').textContent = document.getElementById('freqMinSlider').value + 'Hz';
+        document.getElementById('freqMaxVal').textContent = document.getElementById('freqMaxSlider').value + 'Hz';
+        document.getElementById('volMinVal').textContent = Math.round(parseFloat(document.getElementById('volMinSlider').value) * 100) + '%';
+        document.getElementById('volMaxVal').textContent = Math.round(parseFloat(document.getElementById('volMaxSlider').value) * 100) + '%';
+        document.getElementById('audioMinVal').textContent = parseFloat(document.getElementById('audioMinSlider').value).toFixed(1) + '秒';
+        document.getElementById('audioMaxVal').textContent = parseFloat(document.getElementById('audioMaxSlider').value).toFixed(1) + '秒';
+    }
+
+    document.querySelectorAll('input[type="range"]').forEach(el => {
+        el.addEventListener('input', updateLabels);
+    });
+
+    // ファイル追加時に事前デコード
+    audioInput.addEventListener('change', (e) => {
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const id = Date.now() + Math.random();
+                // AudioContextがない場合は一時的に作成してデコード
+                const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
+                try {
+                    const audioBuffer = await tempCtx.decodeAudioData(ev.target.result);
+                    audioFiles.push({ id, name: file.name, buffer: audioBuffer, enabled: true });
+                    renderAudioList();
+                } catch (e) {
+                    console.error('デコードエラー:', e);
+                } finally {
+                    tempCtx.close();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        audioInput.value = '';
+    });
+
+    function renderAudioList() {
+        audioFileList.innerHTML = '';
+        audioFiles.forEach(f => {
+            const item = document.createElement('div');
+            item.className = 'audio-file-item';
+            item.innerHTML = `
+                <input type="checkbox" ${f.enabled ? 'checked' : ''} onchange="toggleAudio('${f.id}', this.checked)">
+                <span class="audio-file-name" title="${f.name}">🎵 ${f.name}</span>
+                <button class="remove-btn" onclick="removeAudio('${f.id}')">✕</button>
+            `;
+            audioFileList.appendChild(item);
+        });
+    }
+
+    function toggleAudio(id, enabled) {
+        const f = audioFiles.find(f => f.id == id);
+        if (f) f.enabled = enabled;
+    }
+
+    function removeAudio(id) {
+        audioFiles = audioFiles.filter(f => f.id != id);
+        renderAudioList();
+    }
+
+    function getSelectedTypes() {
+        return Array.from(document.querySelectorAll('#soundTypes input[type="checkbox"]:checked')).map(el => el.value);
+    }
+
+    function getEnabledAudioFiles() {
+        return audioFiles.filter(f => f.enabled);
+    }
+
+    function playBeep(type, freq, duration, volume, ctx) {
+        if (type === 'noise') {
+            const bufferSize = ctx.sampleRate * duration;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+            source.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            source.start(ctx.currentTime);
+            source.stop(ctx.currentTime + duration);
+        } else {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+            gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + duration);
+        }
+    }
+
+    // 事前デコード済みバッファを直接再生
+    function playAudioClip(audioBuffer, playDuration, volume, ctx) {
+        const totalDuration = audioBuffer.duration;
+        const maxStart = Math.max(0, totalDuration - playDuration);
+        const startOffset = getRandom(0, maxStart);
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        const gainNode = ctx.createGain();
+        gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+        source.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        source.start(ctx.currentTime, startOffset, playDuration);
+    }
+
+    function beep() {
+        if (!running) return;
+
+        const mixAudio = document.getElementById('mixAudio').checked;
+        const types = getSelectedTypes();
+        const enabledAudios = getEnabledAudioFiles();
+
+        const intMin = parseFloat(document.getElementById('intervalMinSlider').value);
+        const intMax = parseFloat(document.getElementById('intervalMaxSlider').value);
+        const volMin = parseFloat(document.getElementById('volMinSlider').value);
+        const volMax = parseFloat(document.getElementById('volMaxSlider').value);
+        const audioMin = parseFloat(document.getElementById('audioMinSlider').value);
+        const audioMax = parseFloat(document.getElementById('audioMaxSlider').value);
+
+        const interval = getRandom(Math.min(intMin, intMax), Math.max(intMin, intMax));
+        const volume = getRandom(Math.min(volMin, volMax), Math.max(volMin, volMax));
+
+        let playDuration = 0;
+        let statusText = '';
+
+        if (enabledAudios.length > 0) {
+            const shouldPlayAudio = mixAudio ? Math.random() > 0.5 : true;
+
+            if (shouldPlayAudio) {
+                const randomFile = enabledAudios[Math.floor(Math.random() * enabledAudios.length)];
+                playDuration = getRandom(Math.min(audioMin, audioMax), Math.max(audioMin, audioMax));
+                playAudioClip(randomFile.buffer, playDuration, volume, audioCtx);
+                statusText = `🎵 ${randomFile.name.substring(0, 20)} | ${playDuration.toFixed(1)}秒 | 次:${interval.toFixed(2)}秒`;
+            } else if (mixAudio && types.length > 0) {
+                const type = types[Math.floor(Math.random() * types.length)];
+                const freqMin = parseFloat(document.getElementById('freqMinSlider').value);
+                const freqMax = parseFloat(document.getElementById('freqMaxSlider').value);
+                const durMin = parseFloat(document.getElementById('durMinSlider').value);
+                const durMax = parseFloat(document.getElementById('durMaxSlider').value);
+                const freq = getRandom(Math.min(freqMin, freqMax), Math.max(freqMin, freqMax));
+                playDuration = getRandom(Math.min(durMin, durMax), Math.max(durMin, durMax));
+                playBeep(type, freq, playDuration, volume, audioCtx);
+                const typeNames = { sine: 'サイン波', square: '矩形波', triangle: '三角波', sawtooth: '鋸歯状波', noise: 'ノイズ' };
+                statusText = `🔔 ${typeNames[type]} | ${Math.round(freq)}Hz | ${playDuration.toFixed(2)}秒 | 次:${interval.toFixed(2)}秒`;
+            }
+        } else if (types.length > 0) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            const freqMin = parseFloat(document.getElementById('freqMinSlider').value);
+            const freqMax = parseFloat(document.getElementById('freqMaxSlider').value);
+            const durMin = parseFloat(document.getElementById('durMinSlider').value);
+            const durMax = parseFloat(document.getElementById('durMaxSlider').value);
+            const freq = getRandom(Math.min(freqMin, freqMax), Math.max(freqMin, freqMax));
+            playDuration = getRandom(Math.min(durMin, durMax), Math.max(durMin, durMax));
+            playBeep(type, freq, playDuration, volume, audioCtx);
+            const typeNames = { sine: 'サイン波', square: '矩形波', triangle: '三角波', sawtooth: '鋸歯状波', noise: 'ノイズ' };
+            statusText = `🔔 ${typeNames[type]} | ${Math.round(freq)}Hz | ${playDuration.toFixed(2)}秒 | 次:${interval.toFixed(2)}秒`;
+        } else {
+            status.textContent = '⚠ 音の種類または音声ファイルを選択してください';
+            return;
+        }
+
+        if (statusText) status.textContent = statusText;
+        timeoutId = setTimeout(beep, (interval + playDuration) * 1000);
+    }
+
+    function skipNext() {
+        if (!running) return;
+        clearTimeout(timeoutId);
+        beep();
+    }
+
+    document.querySelectorAll('.preview-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            playBeep(btn.dataset.type, 880, 0.3, 0.3, ctx);
+        });
+    });
+
+    startBtn.addEventListener('click', () => {
+        if (!running) {
+            const types = getSelectedTypes();
+            const enabledAudios = getEnabledAudioFiles();
+            if (types.length === 0 && enabledAudios.length === 0) {
+                document.getElementById('typeWarning').style.display = 'block';
+                return;
+            }
+            document.getElementById('typeWarning').style.display = 'none';
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            running = true;
+            startBtn.textContent = '⏹ 停止';
+            startBtn.classList.add('stop');
+            skipBtn.disabled = false;
+            status.textContent = '実行中...';
+            beep();
+        } else {
+            running = false;
+            clearTimeout(timeoutId);
+            startBtn.textContent = '▶ 開始';
+            startBtn.classList.remove('stop');
+            skipBtn.disabled = true;
+            status.textContent = '停止しました';
+        }
+    });
+
+    function resetAll() {
+        if (running) {
+            running = false;
+            clearTimeout(timeoutId);
+            startBtn.textContent = '▶ 開始';
+            startBtn.classList.remove('stop');
+            skipBtn.disabled = true;
+        }
+        document.getElementById('intervalMinSlider').value = 0;
+        document.getElementById('intervalMaxSlider').value = 1.0;
+        document.getElementById('durMinSlider').value = 0.1;
+        document.getElementById('durMaxSlider').value = 0.5;
+        document.getElementById('freqMinSlider').value = 440;
+        document.getElementById('freqMaxSlider').value = 1200;
+        document.getElementById('volMinSlider').value = 0.1;
+        document.getElementById('volMaxSlider').value = 0.5;
+        document.getElementById('audioMinSlider').value = 0.5;
+        document.getElementById('audioMaxSlider').value = 3.0;
+        audioFiles = [];
+        renderAudioList();
+        document.querySelectorAll('#soundTypes input[type="checkbox"]').forEach((el, i) => {
+            el.checked = i < 2;
+        });
+        updateLabels();
+        status.textContent = '準備完了';
+    }
+
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clock').textContent = `${h}:${m}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+    updateLabels();
+</script>
+</body>
+</html>
